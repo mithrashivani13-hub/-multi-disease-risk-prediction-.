@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vitalign — Multi-Disease Risk Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital@0;1&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #F5F7F6;
+    --panel: #FFFFFF;
+    --ink: #10241F;
+    --ink-soft: #4B5D58;
+    --navy: #1B3A4B;
+    --line: #DCE3E0;
+    --safe: #0EA679;
+    --risk: #D9483C;
+    --risk-soft: #FBEAE8;
+    --safe-soft: #E7F6F0;
+    --mono: 'IBM Plex Mono', monospace;
+    --serif: 'Libre Caslon Text', serif;
+    --sans: 'Inter', sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--sans);
+    min-height:100vh;
+  }
+  .ecg-strip{
+    height:36px; width:100%; overflow:hidden; background:var(--navy);
+  }
+  .ecg-strip svg{ width:200%; height:100%; animation: scroll 6s linear infinite; }
+  @keyframes scroll{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
+
+  header{
+    padding:32px 48px 24px; border-bottom:1px solid var(--line);
+    display:flex; justify-content:space-between; align-items:flex-end;
+  }
+  .brand{ font-family:var(--serif); font-style:italic; font-size:28px; letter-spacing:0.3px; }
+  .brand span{ font-style:normal; font-family:var(--mono); font-size:12px; color:var(--ink-soft); display:block; margin-top:4px; letter-spacing:1.5px; text-transform:uppercase;}
+  .tagline{ font-family:var(--mono); font-size:12px; color:var(--ink-soft); text-align:right; max-width:280px; line-height:1.5;}
+
+  main{ padding:40px 48px 80px; display:grid; grid-template-columns:1fr 1fr; gap:32px; max-width:1200px; margin:0 auto;}
+  @media (max-width:880px){ main{grid-template-columns:1fr;} header{flex-direction:column; align-items:flex-start; gap:12px;} }
+
+  .panel{ background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:28px; }
+  .panel h2{
+    font-family:var(--serif); font-size:20px; font-weight:400; margin-bottom:4px;
+  }
+  .eyebrow{ font-family:var(--mono); font-size:11px; color:var(--ink-soft); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:8px; }
+  .panel p.desc{ color:var(--ink-soft); font-size:13px; margin-bottom:20px; }
+
+  .tabs{ display:flex; gap:4px; margin-bottom:20px; border-bottom:1px solid var(--line); }
+  .tab{ font-family:var(--mono); font-size:12px; padding:10px 16px; cursor:pointer; color:var(--ink-soft); border-bottom:2px solid transparent; }
+  .tab.active{ color:var(--ink); border-bottom-color:var(--navy); font-weight:500; }
+
+  .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .field{ display:flex; flex-direction:column; gap:6px; }
+  .field.full{ grid-column: 1 / -1; }
+  label{ font-family:var(--mono); font-size:11px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.5px; }
+  input, select{
+    font-family:var(--sans); font-size:14px; padding:9px 10px; border:1px solid var(--line);
+    border-radius:3px; background:#FAFBFB; color:var(--ink);
+  }
+  input:focus, select:focus{ outline:2px solid var(--navy); outline-offset:1px; border-color:var(--navy); }
+
+  .predict-btn{
+    margin-top:20px; width:100%; padding:13px; background:var(--navy); color:#fff; border:none;
+    border-radius:3px; font-family:var(--sans); font-weight:600; font-size:14px; cursor:pointer;
+    letter-spacing:0.2px; transition:background .15s;
+  }
+  .predict-btn:hover{ background:#122935; }
+  .predict-btn:disabled{ opacity:0.5; cursor:not-allowed; }
+
+  .results{ display:flex; flex-direction:column; gap:16px; }
+  .result-card{
+    border:1px solid var(--line); border-radius:4px; padding:20px; background:var(--panel);
+    display:flex; align-items:center; gap:20px;
+  }
+  .gauge{ position:relative; width:76px; height:76px; flex-shrink:0; }
+  .gauge svg{ transform:rotate(-90deg); }
+  .gauge-bg{ fill:none; stroke:var(--line); stroke-width:8; }
+  .gauge-fill{ fill:none; stroke-width:8; stroke-linecap:round; transition:stroke-dashoffset 0.6s ease; }
+  .gauge-label{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:14px; font-weight:500;}
+  .result-info{ flex:1; }
+  .result-info .disease-name{ font-family:var(--serif); font-size:17px; margin-bottom:2px; }
+  .result-info .verdict{ font-family:var(--mono); font-size:12px; text-transform:uppercase; letter-spacing:1px; padding:3px 8px; border-radius:2px; display:inline-block; margin-top:4px;}
+  .verdict.safe{ background:var(--safe-soft); color:var(--safe); }
+  .verdict.risk{ background:var(--risk-soft); color:var(--risk); }
+  .result-info .model-tag{ font-family:var(--mono); font-size:11px; color:var(--ink-soft); margin-top:6px; }
+
+  .empty-state{ color:var(--ink-soft); font-family:var(--mono); font-size:13px; line-height:1.6; padding:40px 10px; text-align:center; }
+  footer{ text-align:center; padding:24px; font-family:var(--mono); font-size:11px; color:var(--ink-soft); }
+</style>
+</head>
+<body>
+
+<div class="ecg-strip">
+  <svg viewBox="0 0 600 36" preserveAspectRatio="none">
+    <polyline fill="none" stroke="#0EA679" stroke-width="1.5"
+      points="0,18 40,18 50,18 55,4 60,32 65,10 70,18 140,18 180,18 185,6 190,30 195,18 260,18
+              300,18 340,18 350,4 355,32 360,10 365,18 440,18 480,18 485,6 490,30 495,18 560,18
+              600,18 640,18 650,4 655,32 660,10 665,18 740,18 780,18 785,6 790,30 795,18 860,18
+              900,18 940,18 950,4 955,32 960,10 965,18 1040,18 1080,18 1085,6 1090,30 1095,18 1160,18
+              1200,18"/>
+  </svg>
+</div>
+
+<header>
+  <div class="brand">Vitalign<span>Multi-Disease Risk Console</span></div>
+  <div class="tagline">Random Forest &amp; KNN models trained on Pima Indians Diabetes and UCI Heart Disease datasets — 70/30 split, evaluated by F1 score.</div>
+</header>
+
+<main>
+  <section class="panel">
+    <div class="eyebrow">Patient Intake</div>
+    <h2>Enter clinical parameters</h2>
+    <p class="desc">Fill in one or both panels, then run the assessment.</p>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="diabetes">Diabetes</div>
+      <div class="tab" data-tab="heart">Heart Disease</div>
+    </div>
+
+    <form id="diabetes-form" class="form-grid">
+      <div class="field"><label>Pregnancies</label><input type="number" name="Pregnancies" value="2" required></div>
+      <div class="field"><label>Glucose (mg/dL)</label><input type="number" name="Glucose" value="150" required></div>
+      <div class="field"><label>Blood Pressure</label><input type="number" name="BloodPressure" value="80" required></div>
+      <div class="field"><label>Skin Thickness</label><input type="number" name="SkinThickness" value="25" required></div>
+      <div class="field"><label>Insulin</label><input type="number" name="Insulin" value="90" required></div>
+      <div class="field"><label>BMI</label><input type="number" step="0.1" name="BMI" value="31.5" required></div>
+      <div class="field"><label>Pedigree Function</label><input type="number" step="0.01" name="DiabetesPedigreeFunction" value="0.50" required></div>
+      <div class="field"><label>Age</label><input type="number" name="Age" value="45" required></div>
+    </form>
+
+    <form id="heart-form" class="form-grid" style="display:none;">
+      <div class="field"><label>Age</label><input type="number" name="age" value="58" required></div>
+      <div class="field"><label>Sex (1=M, 0=F)</label><input type="number" name="sex" value="1" required></div>
+      <div class="field"><label>Chest Pain Type (0–3)</label><input type="number" name="cp" value="2" required></div>
+      <div class="field"><label>Resting BP</label><input type="number" name="trestbps" value="140" required></div>
+      <div class="field"><label>Cholesterol</label><input type="number" name="chol" value="240" required></div>
+      <div class="field"><label>Fasting Sugar &gt;120</label><input type="number" name="fbs" value="0" required></div>
+      <div class="field"><label>Resting ECG (0–2)</label><input type="number" name="restecg" value="1" required></div>
+      <div class="field"><label>Max Heart Rate</label><input type="number" name="thalach" value="150" required></div>
+      <div class="field"><label>Exercise Angina</label><input type="number" name="exang" value="0" required></div>
+      <div class="field"><label>Oldpeak</label><input type="number" step="0.1" name="oldpeak" value="1.2" required></div>
+      <div class="field"><label>Slope (0–2)</label><input type="number" name="slope" value="1" required></div>
+      <div class="field"><label>Major Vessels (0–4)</label><input type="number" name="ca" value="0" required></div>
+      <div class="field"><label>Thal (1–3)</label><input type="number" name="thal" value="2" required></div>
+    </form>
+
+    <button class="predict-btn" id="predict-btn">Run Risk Assessment</button>
+  </section>
+
+  <section class="panel">
+    <div class="eyebrow">Output</div>
+    <h2>Prediction results</h2>
+    <p class="desc">Probability from the best-performing model per disease.</p>
+    <div class="results" id="results">
+      <div class="empty-state">— No assessment run yet —<br>Submit a form on the left to see live predictions from the Flask API.</div>
+    </div>
+  </section>
+</main>
+
+<footer>Vitalign · academic project demo · not a substitute for professional medical diagnosis</footer>
+
+<script>
+const API_BASE = "http://localhost:5000";
+
+const tabs = document.querySelectorAll(".tab");
+const forms = { diabetes: document.getElementById("diabetes-form"), heart: document.getElementById("heart-form") };
+let activeTab = "diabetes";
+
+tabs.forEach(t => t.addEventListener("click", () => {
+  tabs.forEach(x => x.classList.remove("active"));
+  t.classList.add("active");
+  activeTab = t.dataset.tab;
+  Object.keys(forms).forEach(k => forms[k].style.display = (k === activeTab ? "grid" : "none"));
+}));
+
+function circleGauge(prob, safe){
+  const r = 30, c = 2 * Math.PI * r;
+  const offset = c - (prob * c);
+  const color = safe ? "var(--safe)" : "var(--risk)";
+  return `<div class="gauge">
+    <svg width="76" height="76" viewBox="0 0 76 76">
+      <circle class="gauge-bg" cx="38" cy="38" r="${r}"></circle>
+      <circle class="gauge-fill" cx="38" cy="38" r="${r}" stroke="${color}"
+        stroke-dasharray="${c}" stroke-dashoffset="${offset}"></circle>
+    </svg>
+    <div class="gauge-label">${Math.round(prob*100)}%</div>
+  </div>`;
+}
+
+function renderResult(r){
+  const safe = r.prediction === "Low Risk";
+  return `<div class="result-card">
+    ${circleGauge(r.risk_probability, safe)}
+    <div class="result-info">
+      <div class="disease-name">${r.disease}</div>
+      <span class="verdict ${safe ? 'safe' : 'risk'}">${r.prediction}</span>
+      <div class="model-tag">model: ${r.model_used} · P(risk) = ${r.risk_probability}</div>
+    </div>
+  </div>`;
+}
+
+document.getElementById("predict-btn").addEventListener("click", async () => {
+  const btn = document.getElementById("predict-btn");
+  const resultsEl = document.getElementById("results");
+  const form = forms[activeTab];
+  const data = {};
+  new FormData(form).forEach((v, k) => data[k] = parseFloat(v));
+
+  btn.disabled = true; btn.textContent = "Running…";
+  try {
+    const res = await fetch(`${API_BASE}/predict/${activeTab}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+    const json = await res.json();
+    if (json.error) throw new Error(json.error);
+    resultsEl.innerHTML = renderResult(json);
+  } catch (err) {
+    resultsEl.innerHTML = `<div class="empty-state" style="color:var(--risk)">
+      Could not reach the API.<br>Make sure app.py is running on localhost:5000.<br>
+      <span style="font-size:11px">${err.message}</span></div>`;
+  }
+  btn.disabled = false; btn.textContent = "Run Risk Assessment";
+});
+</script>
+</body>
+</html>

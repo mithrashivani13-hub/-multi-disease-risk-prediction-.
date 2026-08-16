@@ -1,0 +1,83 @@
+{
+  "best_model": "KNN",
+  "feature_order": [
+    "age",
+    "sex",
+    "cp",
+    "trestbps",
+    "chol",
+    "fbs",
+    "restecg",
+    "thalach",
+    "exang",
+    "oldpeak",
+    "slope",
+    "ca",
+    "thal"
+  ],
+  "results": {
+    "RandomForest": {
+      "accuracy": 0.7912,
+      "precision": 0.7679,
+      "recall": 0.8776,
+      "f1_score": 0.819,
+      "confusion_matrix": [
+        [
+          29,
+          13
+        ],
+        [
+          6,
+          43
+        ]
+      ]
+    },
+    "KNN": {
+      "accuracy": 0.8022,
+      "precision": 0.7818,
+      "recall": 0.8776,
+      "f1_score": 0.8269,
+      "confusion_matrix": [
+        [
+          30,
+          12
+        ],
+        [
+          6,
+          43
+        ]
+      ]
+    },
+    "LogisticRegression": {
+      "accuracy": 0.7802,
+      "precision": 0.7636,
+      "recall": 0.8571,
+      "f1_score": 0.8077,
+      "confusion_matrix": [
+        [
+          29,
+          13
+        ],
+        [
+          7,
+          42
+        ]
+      ]
+    }
+  },
+  "feature_importance": {
+    "cp": 0.1365,
+    "thalach": 0.1252,
+    "ca": 0.1098,
+    "thal": 0.1084,
+    "oldpeak": 0.1073,
+    "age": 0.0912,
+    "chol": 0.0789,
+    "trestbps": 0.077,
+    "exang": 0.0512,
+    "slope": 0.0479,
+    "sex": 0.0363,
+    "restecg": 0.0201,
+    "fbs": 0.0102
+  }
+}

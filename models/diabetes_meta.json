@@ -1,0 +1,73 @@
+{
+  "best_model": "KNN",
+  "feature_order": [
+    "Pregnancies",
+    "Glucose",
+    "BloodPressure",
+    "SkinThickness",
+    "Insulin",
+    "BMI",
+    "DiabetesPedigreeFunction",
+    "Age"
+  ],
+  "results": {
+    "RandomForest": {
+      "accuracy": 0.7446,
+      "precision": 0.6719,
+      "recall": 0.5309,
+      "f1_score": 0.5931,
+      "confusion_matrix": [
+        [
+          129,
+          21
+        ],
+        [
+          38,
+          43
+        ]
+      ]
+    },
+    "KNN": {
+      "accuracy": 0.7446,
+      "precision": 0.6618,
+      "recall": 0.5556,
+      "f1_score": 0.604,
+      "confusion_matrix": [
+        [
+          127,
+          23
+        ],
+        [
+          36,
+          45
+        ]
+      ]
+    },
+    "LogisticRegression": {
+      "accuracy": 0.7446,
+      "precision": 0.6719,
+      "recall": 0.5309,
+      "f1_score": 0.5931,
+      "confusion_matrix": [
+        [
+          129,
+          21
+        ],
+        [
+          38,
+          43
+        ]
+      ]
+    }
+  },
+  "feature_importance": {
+    "Glucose": 0.2561,
+    "BMI": 0.1658,
+    "Age": 0.1317,
+    "DiabetesPedigreeFunction": 0.1238,
+    "Insulin": 0.0875,
+    "BloodPressure": 0.0842,
+    "Pregnancies": 0.0793,
+    "SkinThickness": 0.0717
+  }
+}
